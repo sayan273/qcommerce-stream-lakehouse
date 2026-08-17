@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: redpanda-broker
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 1G
+      - --overprovisioned
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+      - "9644:9644"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: analytics-postgres
+    environment:
+      POSTGRES_USER: de_user
+      POSTGRES_PASSWORD: de_password
+      POSTGRES_DB: warehouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
