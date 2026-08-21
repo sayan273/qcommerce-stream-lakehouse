@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: fct_hourly_city_metrics
+    description: "Hourly aggregations of order telemetry, surge multipliers, and GMV by city and category."
+    columns:
+      - name: total_orders
+        tests:
+          - not_null
+      - name: total_gmv_inr
+        tests:
+          - not_null

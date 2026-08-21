@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: warehouse
+    schema: public
+    tables:
+      - name: raw_orders
+
+models:
+  - name: stg_orders
+    description: "Cleaned and standardized order event records."
+    columns:
+      - name: order_id
+        description: "Primary key for raw order."
+        tests:
+          - unique
+          - not_null
+      - name: order_value_inr
+        tests:
+          - not_null
