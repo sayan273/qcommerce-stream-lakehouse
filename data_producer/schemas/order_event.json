@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QuickCommerceOrderEvent",
+  "type": "object",
+  "properties": {
+    "order_id": { "type": "string" },
+    "city": { "type": "string" },
+    "category": { "type": "string" },
+    "order_value_inr": { "type": "number", "minimum": 0 },
+    "surge_multiplier": { "type": "number", "minimum": 1.0 },
+    "timestamp": { "type": "string", "format": "date-time" }
+  },
+  "required": ["order_id", "city", "category", "order_value_inr", "surge_multiplier", "timestamp"]
+}

@@ -1,0 +1,6 @@
+{
+  "bootstrap_servers": "localhost:9092",
+  "topic": "raw_orders_stream",
+  "batch_size": 10,
+  "schema_version": "1.0.0"
+}
