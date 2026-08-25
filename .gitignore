@@ -1,9 +1,18 @@
-```text
+# Python
 __pycache__/
 *.py[cod]
-.venv/
+*$py.class
+*.env
 venv/
-.env
+.venv/
+
+# dbt
 target/
 dbt_packages/
 logs/
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+*.log

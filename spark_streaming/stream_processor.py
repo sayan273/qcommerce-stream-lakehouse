@@ -16,8 +16,8 @@ def get_db_connection():
 
 def consume_stream():
     consumer = KafkaConsumer(
-        'raw_orders_stream',
-        bootstrap_servers=['localhost:9092'],
+        'order-events',
+        bootstrap_servers=['localhost:19092'],
         auto_offset_reset='earliest',
         enable_auto_commit=True,
         group_id='order_processor_group',
@@ -30,10 +30,12 @@ def consume_stream():
     batch = []
     BATCH_SIZE = 10
     
-    print("Listening for messages on 'raw_orders_stream'...")
+    print("Listening for messages on 'order-events'...")
 
     insert_query = """
-        INSERT INTO raw_orders (order_id, city, category, order_value_inr, surge_multiplier, event_timestamp)
+        INSERT INTO raw_orders (
+            order_id, user_id, city, category, amount, payment_mode, status, event_timestamp
+        )
         VALUES %s
         ON CONFLICT (order_id) DO NOTHING;
     """
@@ -43,10 +45,12 @@ def consume_stream():
             event = message.value
             batch.append((
                 event["order_id"],
+                event["user_id"],
                 event["city"],
                 event["category"],
-                event["order_value_inr"],
-                event["surge_multiplier"],
+                event["amount"],
+                event["payment_mode"],
+                event["status"],
                 event["timestamp"]
             ))
 
