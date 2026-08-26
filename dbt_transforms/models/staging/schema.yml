@@ -9,13 +9,19 @@ sources:
 
 models:
   - name: stg_orders
-    description: "Cleaned and standardized order event records."
+    description: "Cleaned and standardized order event records with status and payment tracking."
     columns:
       - name: order_id
-        description: "Primary key for raw order."
+        description: "Primary key UUID generated for the order event."
         tests:
           - unique
           - not_null
-      - name: order_value_inr
+      - name: amount
         tests:
           - not_null
+          - assert_valid_order_metrics
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SUCCESS', 'FAILED', 'PENDING']
