@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: fct_city_payment_performance
+    description: "Aggregated conversion and failure telemetry across payment modes and regional hubs."
+    columns:
+      - name: city
+        tests:
+          - not_null
+      - name: payment_mode
+        tests:
+          - not_null
+      - name: success_rate_pct
+        tests:
+          - not_null
