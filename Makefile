@@ -33,3 +33,9 @@ check:
 
 clean:
 	docker-compose down -v
+	
+report:
+	python scripts/analytics_reporting.py
+
+lint:
+	flake8 . --count --max-line-length=127 --exclude=venv,.venv
