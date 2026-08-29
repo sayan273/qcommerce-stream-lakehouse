@@ -17,6 +17,18 @@ CATEGORIES = ['Groceries', 'Dairy & Eggs', 'Snacks', 'Beverages', 'Personal Care
 PAYMENT_MODES = ['UPI', 'Credit Card', 'NetBanking', 'COD']
 
 def generate_order():
+    # 5% chance to simulate a malformed/corrupted event
+    if random.random() < 0.05:
+        return {
+            "order_id": fake.uuid4(),
+            "user_id": None,
+            "city": random.choice(CITIES),
+            "amount": -150.00,  # Negative anomaly
+            "payment_mode": "UNKNOWN_GATEWAY",
+            "status": "CORRUPTED",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
     return {
         "order_id": fake.uuid4(),
         "user_id": f"USR_{random.randint(1000, 9999)}",
@@ -29,12 +41,12 @@ def generate_order():
     }
 
 if __name__ == "__main__":
-    print("Starting Order Event Producer...")
+    print("Starting Order Event Producer with Anomaly Simulation...")
     try:
         while True:
             event = generate_order()
             producer.send('order-events', value=event)
-            print(f"Emitted: {event['order_id']} | ₹{event['amount']} | {event['city']}")
+            print(f"Emitted: {event['order_id']} | ₹{event.get('amount')} | Status: {event.get('status')}")
             time.sleep(random.uniform(0.2, 0.8))
     except KeyboardInterrupt:
         print("Producer stopped.")

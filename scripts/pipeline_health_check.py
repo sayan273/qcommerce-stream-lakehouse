@@ -1,6 +1,5 @@
 import psycopg2
-import sys
-from kafka import KafkaAdminClient
+from kafka import KafkaAdminClient, KafkaConsumer
 
 DB_CONFIG = {
     "host": "localhost",
@@ -24,19 +23,17 @@ def verify_database_layers():
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        # Verify Raw Bronze Table
         cursor.execute("SELECT COUNT(*) FROM raw_orders;")
         raw_count = cursor.fetchone()[0]
         print(f"✅ Bronze Layer (raw_orders): {raw_count} total records ingested.")
         
-        # Verify Success Rate Breakdown
         cursor.execute("""
             SELECT status, COUNT(*) 
             FROM raw_orders 
             GROUP BY status;
         """)
         breakdown = cursor.fetchall()
-        print(f"📊 Telemetry Distribution: {dict(breakdown)}")
+        print(f"📊 Ingested Status Breakdown: {dict(breakdown)}")
         
         cursor.close()
         conn.close()
