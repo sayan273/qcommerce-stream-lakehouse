@@ -39,3 +39,9 @@ report:
 
 lint:
 	flake8 . --count --max-line-length=127 --exclude=venv,.venv
+
+alert-test:
+	python scripts/pipeline_notifier.py
+
+db-clean:
+	docker exec -i qcommerce-stream-lakehouse-postgres-1 psql -U de_user -d warehouse < scripts/maintenance_cleanup.sql
