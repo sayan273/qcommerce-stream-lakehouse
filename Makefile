@@ -45,3 +45,6 @@ alert-test:
 
 db-clean:
 	docker exec -i qcommerce-stream-lakehouse-postgres-1 psql -U de_user -d warehouse < scripts/maintenance_cleanup.sql
+
+archive-lake:
+	python scripts/lakehouse_archiver.py
