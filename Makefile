@@ -48,3 +48,6 @@ db-clean:
 
 archive-lake:
 	python scripts/lakehouse_archiver.py
+
+duckdb-query:
+	python scripts/duckdb_lakehouse_analytics.py
