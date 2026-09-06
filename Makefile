@@ -51,3 +51,6 @@ archive-lake:
 
 duckdb-query:
 	python scripts/duckdb_lakehouse_analytics.py
+
+monitor:
+	python scripts/kafka_stream_monitor.py
