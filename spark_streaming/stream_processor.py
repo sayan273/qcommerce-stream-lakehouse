@@ -2,6 +2,13 @@ import json
 import psycopg2
 from psycopg2.extras import execute_values
 from kafka import KafkaConsumer, KafkaProducer
+from pydantic import ValidationError
+import sys
+import os
+
+# Ensure models directory is in pythonpath
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from data_producer.schemas.order_models import OrderEventModel
 
 DB_CONFIG = {
     "host": "localhost",
@@ -10,19 +17,6 @@ DB_CONFIG = {
     "user": "de_user",
     "password": "de_password"
 }
-
-REQUIRED_KEYS = {"order_id", "user_id", "city", "category", "amount", "payment_mode", "status", "timestamp"}
-
-def validate_event(event):
-    if not isinstance(event, dict):
-        return False, "Payload is not a JSON object"
-    if not REQUIRED_KEYS.issubset(event.keys()):
-        return False, f"Missing required keys: {REQUIRED_KEYS - set(event.keys())}"
-    if event.get("amount") is None or event.get("amount") <= 0:
-        return False, f"Invalid amount: {event.get('amount')}"
-    if event.get("status") not in {"SUCCESS", "FAILED", "PENDING"}:
-        return False, f"Invalid status: {event.get('status')}"
-    return True, "Valid"
 
 def consume_stream():
     consumer = KafkaConsumer(
@@ -45,7 +39,7 @@ def consume_stream():
     batch = []
     BATCH_SIZE = 10
     
-    print("Listening for messages with DLQ validation enabled...")
+    print("Listening with Pydantic contract validation active...")
 
     insert_query = """
         INSERT INTO raw_orders (
@@ -57,38 +51,40 @@ def consume_stream():
 
     try:
         for message in consumer:
-            event = message.value
-            is_valid, reason = validate_event(event)
+            raw_event = message.value
 
-            if not is_valid:
+            # Strict Pydantic Schema Validation
+            try:
+                validated_order = OrderEventModel(**raw_event)
+            except ValidationError as err:
                 dlq_payload = {
-                    "raw_record": event,
-                    "error_reason": reason,
+                    "raw_record": raw_event,
+                    "validation_errors": err.errors(),
                     "quarantined_at": message.timestamp
                 }
                 dlq_producer.send('order-events-dlq', value=dlq_payload)
-                print(f"⚠️ DLQ Routed: {event.get('order_id')} | Reason: {reason}")
+                print(f"⚠️ Contract Violation -> DLQ: {raw_event.get('order_id')} | {err.error_count()} errors")
                 continue
 
             batch.append((
-                event["order_id"],
-                event["user_id"],
-                event["city"],
-                event["category"],
-                event["amount"],
-                event["payment_mode"],
-                event["status"],
-                event["timestamp"]
+                validated_order.order_id,
+                validated_order.user_id,
+                validated_order.city,
+                validated_order.category,
+                validated_order.amount,
+                validated_order.payment_mode,
+                validated_order.status,
+                validated_order.timestamp.isoformat()
             ))
 
             if len(batch) >= BATCH_SIZE:
                 execute_values(cursor, insert_query, batch)
                 conn.commit()
-                print(f"Committed batch of {len(batch)} clean records to PostgreSQL.")
+                print(f"Committed batch of {len(batch)} validated records to PostgreSQL.")
                 batch.clear()
 
     except KeyboardInterrupt:
-        print("Stopping consumer...")
+        print("Stopping processor...")
     finally:
         if batch:
             execute_values(cursor, insert_query, batch)
