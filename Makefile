@@ -54,3 +54,6 @@ duckdb-query:
 
 monitor:
 	python scripts/kafka_stream_monitor.py
+
+dashboard:
+	streamlit run src/dashboard/app.py
