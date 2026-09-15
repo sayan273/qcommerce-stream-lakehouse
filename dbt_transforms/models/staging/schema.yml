@@ -6,6 +6,7 @@ sources:
     schema: public
     tables:
       - name: raw_orders
+      - name: raw_users
 
 models:
   - name: stg_orders

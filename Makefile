@@ -57,3 +57,9 @@ monitor:
 
 dashboard:
 	streamlit run src/dashboard/app.py
+
+dbt-snapshot:
+	cd dbt_transforms && dbt snapshot --profiles-dir .
+
+mutate-user:
+	python scripts/simulate_user_tier_drift.py
