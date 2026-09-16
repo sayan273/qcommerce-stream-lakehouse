@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: fct_delivery_performance
+    description: "Aggregated quick-commerce fulfillment and rider delivery performance analytics."
+    columns:
+      - name: city
+        tests:
+          - not_null
+      - name: sla_breach_rate_pct
+        tests:
+          - not_null
